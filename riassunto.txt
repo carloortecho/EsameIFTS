@@ -1,0 +1,33 @@
+Progettazione e realizzazione di una app algoritmica con dashboard
+
+Sviluppo algoritmo Python utilizzando librerie scientifiche per analisi dati
+
+Obiettivi:
+- Realizzare l'applicazione con Python integrando librerie scientifiche (scikit pandas matplotlib)
+- creare un Mockup di una dashboard, consentire di effettuare un Login
+- Eseguire una operazione di data analytics
+- Effettuare ricerche filtrate nel database usando due operatori (SELECT; WHERE; FROM; ETC....)
+
+--- Schema di analisi adeguato: ---
+Spiegare come è stato realizzato tutto il lavoro (Dashboard, Login, Caricamento dati CSV)
+
+Schema di analisi
+
+Descrizione Azienda: Impresa 4.0
+Descrizione dati: Spiegare i dati raccolti, come vengono archiviati e organizzati nel database, includere le metriche interesse e indicatori chiave di prestazioni (KPI) che l'azienda desidera monitorare.
+
+Progettazione algoritmica: Illustrare il processo di programmazione dell'algoritmo per l'analisi dei dati
+
+Progettazione della dashboard: Cosa uso per progettare/realizzare?
+
+Comandi: Come gli utenti possono interagire con la Dashboard?
+
+Rilascio materiale finale (Gitlab)
+
+---
+
+Valutazione esame:
+
+- Orale 50 punti
+- Scritto 30 punti
+- Tesina 20 punti
