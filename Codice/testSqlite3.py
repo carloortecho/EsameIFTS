@@ -1,3 +1,4 @@
+import re
 import sqlite3 as sql
 import os
 import bcrypt as bc
@@ -36,8 +37,25 @@ def registerUser(usr, pwd):
         conn = sql.connect(db_path)
         cursor = conn.cursor()
         
-        # PASSWORD CYPHER
-        hashed_pwd = bc.hashpw(pwd.encode('utf-8'), bc.gensalt())
+        reasons = []
+        # Check if pwd respects the password policies...
+        if len(pwd) < 8:
+            reasons.append('Password should have at least 8 characters.')
+            
+        if not re.search(r'[A-Z]', pwd):
+            reasons.append('Password should contain at least one uppercase letter.')
+            
+        if not re.search(r'\d', pwd):
+            reasons.append('Password should contain at least one number')
+            
+        if not re.search(r'[!@#$%^&/()+\-*/]', pwd):
+            reasons.append('Password should contain at least one special character.')
+            
+        if reasons:
+            return False, reasons
+        
+        # Encrypting pwd after checks policies
+        hashed_pwd = bc.hashpw(pwd.encode('utf-8'), bc.gensalt()).decode()
 
         registerUser_query = '''INSERT INTO Users (username, password) VALUES (?, ?) '''
 
@@ -54,7 +72,7 @@ def registerUser(usr, pwd):
         conn.close()
         print('Connection to database closed...')
     
-    return registerStatus
+    return registerStatus, []
         
 # --- LOGIN USER ---
 def loginUser(usr, pwd):
@@ -72,14 +90,12 @@ def loginUser(usr, pwd):
         # Check if user exists...
         if (row is not None):
             stored_usr, stored_pwd = row
-            if (bc.checkpw(pwd.encode('utf-8'), stored_pwd)):
+            if (bc.checkpw(pwd.encode('utf-8'), stored_pwd.encode('utf-8'))):
                 loginStatus = True
             else:
                 loginStatus = False
         else:
             loginStatus = False
-        
-         #loginStatus = bool(row)
         
     except sql.Error as e:
         print(f'Commit failed... Reason: {e}')

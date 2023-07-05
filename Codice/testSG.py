@@ -75,12 +75,11 @@ def registraUtente():
         [sg.Text("Password")], [sg.InputText(key="reg_password", password_char="*")],
         [sg.Text("Conferma password")], [sg.InputText(key="passwordconf", password_char="*")],
         [sg.Button("Registrati")],
+        [sg.Text(size=(40,1), key='-OUTPUT-', text_color='red')],
         [sg.Button("Menu")]
     ]
     
     registra_window = sg.Window("Registra utente", registra_layout)
-    
-    isPasswordMatched = False
     
     while True:
         event, values = registra_window.read()
@@ -94,15 +93,16 @@ def registraUtente():
             
             if (values['reg_password'] == values['passwordconf']):
                 password = values['reg_password']
-                registeredUser = sql.registerUser(username, password)
+                registeredUser, reasons = sql.registerUser(username, password)
                 
-                if (registeredUser == True):
+                if (registeredUser):
                     sg.popup("User registered successfull...")
                     registra_window.close()
                     main()
                     break
                 else:
-                    sg.popup("User already exists...")
+                    error_message = '\n'.join(reasons)
+                    registra_window['-OUTPUT-'].update(error_message)
             else:
                 sg.popup("La password non coincide.")
                 
