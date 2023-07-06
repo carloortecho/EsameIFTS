@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 import userManager as sql
-from dashboard import insertDataFromCSV, showDataFromCSV, deleteData_FromDB
-from machineLearning import loadCSV, makePredictions, addPredictedColumn, runMachineLearning, showData
+from machineLearning import loadCSV, addPredictedColumn, runMachineLearning, showData
+import pandas as pd
 
 # --- INTRO LAYOUT ---
 def welcomeLayout():
@@ -59,7 +59,6 @@ def doLogin():
             
             isLogged = sql.loginUser(username, password)
             if (isLogged):
-                sg.popup('Login successful...')
                 login_window.close()
                 return username
             else:
@@ -127,6 +126,7 @@ def doDashboard(usr):
         [sg.Button('Visualizza dati CSV')],
         [sg.Button("Esegui machine learning")],
         [sg.Button("Prevedi su nuovo CSV")],
+        [sg.Button("Cerca dati CSV")],
         [sg.Button("Logout")],
         [sg.Text("File CSV non caricato...", text_color='red', key='-statusCSV-')]
     ]
@@ -144,7 +144,7 @@ def doDashboard(usr):
             file_path = sg.popup_get_file("Seleziona il file CSV", file_types=(("CSV Files", "*.csv"),))
             if file_path:
                 loadCSV(file_path)
-                winDashboard['-statusCSV-'].update('File CSV caricato')
+                winDashboard['-statusCSV-'].update('File CSV caricato', text_color='green')
             
         if event == "Visualizza dati CSV":
             showData()
@@ -157,29 +157,35 @@ def doDashboard(usr):
                 
             if file_path:
                 addPredictedColumn(file_path)
+                
+        if event == "Cerca dati CSV":
+            csvToCheck = sg.popup_get_file("Seleziona il file CSV", file_types=(("CSV Files", "*.csv"),))
+            if csvToCheck:
+                searchCSV(csvToCheck)
 
         if event == "Logout":
             winDashboard.close()
             main()
             break
 
-# --- CERCA DB ---
-def searchCSV():
+# --- CERCA CSV ---
+def searchCSV(csvToCheck):
 
     operators = ['==', '!=', '>', '>=', '<', '<=']
 
     search_layout = [
-        [sg.Text('Marca:')], [sg.InputText(key='-marca-')],
-        [sg.Text('Modello:')], [sg.InputText(key='-modello-')],
-        [sg.Text('Colore:')], [sg.InputText(key='-colore-')],
-        [sg.Text('Materiale:')], [sg.InputText(key='-materiale-')],
-        [sg.Text('Dimensione:')], [sg.InputText(key='-dimensione-')],
-        [sg.Text('Prezzo:')], [sg.InputText(key='-prezzo-')],
+        [sg.Text('Marca:')], [sg.InputText(key='-Marca-')],
+        [sg.Text('Modello:')], [sg.InputText(key='-Modello-')],
+        [sg.Text('Colore:')], [sg.InputText(key='-Colore-')],
+        [sg.Text('Materiale:')], [sg.InputText(key='-Materiale-')],
+        [sg.Text('Dimensione:')], [sg.InputText(key='-Dimensione-')],
+        [sg.Text('Prezzo:')], [sg.InputText(key='-Prezzo-')],
         [sg.Text("Seleziona un operatore:")], [sg.Combo(operators, key="-OPERATOR-", enable_events=True)],
-        [sg.Text('Tipo:')], [sg.InputText(key='-tipo-')],
-        [sg.Text('ProtezioneUV:')], [sg.InputText(key='-protezioneuv-')],
+        [sg.Text('Tipo:')], [sg.InputText(key='-Tipo-')],
+        [sg.Text('ProtezioneUV:')], [sg.InputText(key='-Protezioneuv-')],
         [sg.Button("Cerca")],
-        [sg.Button("Back")]
+        [sg.Button("Back")],
+        [sg.Text(f'Search CSV: {csvToCheck}', text_color='green')]
     ]
 
     winSearchDashboard = sg.Window('Dashboard', search_layout)
@@ -193,7 +199,45 @@ def searchCSV():
             break
 
         if event == 'Cerca':
-            pass
+            # Load the CSV data into a DataFrame
+            data = pd.read_csv(csvToCheck)
+
+            # Extract the operator selected for the price
+            operator = values['-OPERATOR-']
+
+            # Preprocess the input values and handle empty inputs
+            filters = {}
+            for key, value in values.items():
+                if key.startswith('-') and key.endswith('-'):
+                    field = key[1:-1]  # Remove the leading and trailing '-' characters
+                    if value:  # Handle empty inputs
+                        filters[field] = value
+
+            # Filter the data based on the user input
+            if filters:
+                filtered_data = data.copy()
+                for field, value in filters.items():
+                    if field == 'Prezzo':
+                        price = int(value)
+                        if operator == '==':
+                            filtered_data = filtered_data[filtered_data[field] == price]
+                        elif operator == '!=':
+                            filtered_data = filtered_data[filtered_data[field] != price]
+                        elif operator == '>':
+                            filtered_data = filtered_data[filtered_data[field] > price]
+                        elif operator == '>=':
+                            filtered_data = filtered_data[filtered_data[field] >= price]
+                        elif operator == '<':
+                            filtered_data = filtered_data[filtered_data[field] < price]
+                        elif operator == '<=':
+                            filtered_data = filtered_data[filtered_data[field] <= price]
+                    else:
+                        filtered_data = filtered_data[filtered_data[field].astype(str).str.contains(value, case=False, na=False)]
+            else:
+                filtered_data = data.copy()
+
+            # Display the filtered data
+            sg.popup_scrolled(filtered_data.to_string(), title='Risultati Ricerca')
 
 
 # --- MAIN ---

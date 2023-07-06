@@ -15,7 +15,7 @@ def createDB():
 
         createDB_query = '''CREATE TABLE IF NOT EXISTS Users
                             (
-                            idutente INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                            idutente INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                             username varchar(20) NOT NULL UNIQUE,
                             password varchar(20) NOT NULL
                             )'''
