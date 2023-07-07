@@ -5,6 +5,8 @@ import pandas as pd
 
 # --- INTRO LAYOUT ---
 def welcomeLayout():
+    sg.theme('Topanga')
+
     welcome_layout = [
         [sg.Text("Benvenuto! Selezionare l'opzione per iniziare...")],
         [sg.Button("Login")],
@@ -180,7 +182,7 @@ def searchCSV(csvToCheck):
         [sg.Text('Materiale:')], [sg.InputText(key='-Materiale-')],
         [sg.Text('Dimensione:')], [sg.InputText(key='-Dimensione-')],
         [sg.Text('Prezzo:')], [sg.InputText(key='-Prezzo-')],
-        [sg.Text("Seleziona un operatore:")], [sg.Combo(operators, key="-OPERATOR-", enable_events=True)],
+        [sg.Text("Seleziona un operatore:")], [sg.Combo(operators, key="-OPERATOR-", default_value=operators[0], enable_events=True)],
         [sg.Text('Tipo:')], [sg.InputText(key='-Tipo-')],
         [sg.Text('ProtezioneUV:')], [sg.InputText(key='-Protezioneuv-')],
         [sg.Button("Cerca")],
@@ -208,10 +210,11 @@ def searchCSV(csvToCheck):
             # Preprocess the input values and handle empty inputs
             filters = {}
             for key, value in values.items():
-                if key.startswith('-') and key.endswith('-'):
-                    field = key[1:-1]  # Remove the leading and trailing '-' characters
-                    if value:  # Handle empty inputs
-                        filters[field] = value
+                if (key != '-OPERATOR-'):
+                    if key.startswith('-') and key.endswith('-'):
+                        field = key[1:-1]  # Remove the leading and trailing '-' characters
+                        if value:  # Handle empty inputs
+                            filters[field] = value
 
             # Filter the data based on the user input
             if filters:
