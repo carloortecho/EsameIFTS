@@ -1,7 +1,8 @@
 import PySimpleGUI as sg
+import pandas as pd
+import os
 import userManager as sql
 from machineLearning import loadCSV, addPredictedColumn, runMachineLearning, showData
-import pandas as pd
 
 # --- INTRO LAYOUT ---
 def welcomeLayout():
@@ -9,12 +10,10 @@ def welcomeLayout():
 
     welcome_layout = [
         [sg.Text("Benvenuto! Selezionare l'opzione per iniziare...")],
-        [sg.Button("Login")],
-        [sg.Button("Registrati")], 
-        [sg.Button("Esci")]
+        [sg.Button('Login')], [sg.Button('Registrati')], [sg.Button('Esci')]
     ]
 
-    welcome_layout = sg.Window('Benvenuto', welcome_layout)
+    welcome_layout = sg.Window('Benvenuto', welcome_layout, resizable=True)
     while True:
         event, values = welcome_layout.read()
         # Lettura eventi dashboard iniziale
@@ -45,7 +44,7 @@ def doLogin():
     ]
 
 
-    login_window = sg.Window("Login username", layout)
+    login_window = sg.Window('Login', layout, resizable=True)
 
     while True:
         event, values = login_window.read()
@@ -70,9 +69,7 @@ def doLogin():
             login_window.close()
             main()
             break
-        
-        
-        
+
 # --- REGISTRAZIONE ---
 def registraUtente():
 
@@ -86,7 +83,7 @@ def registraUtente():
         [sg.Button("Menu")]
     ]
     
-    registra_window = sg.Window("Registra utente", registra_layout)
+    registra_window = sg.Window('Registazione', registra_layout, resizable=True)
     
     while True:
         event, values = registra_window.read()
@@ -123,7 +120,7 @@ def registraUtente():
 # --- DASHBOARD ---
 def doDashboard(usr):
     dashboard_layout = [
-        [sg.Text(f'Benvenuto {usr[0].upper() + usr[1:]}')],
+        [sg.Text(f'Benvenuto {usr[0].upper() + usr[1:]}\nSeleziona l\'operazione da fare:')],
         [sg.Button("Carica dati CSV")],
         [sg.Button('Visualizza dati CSV')],
         [sg.Button("Esegui machine learning")],
@@ -133,7 +130,7 @@ def doDashboard(usr):
         [sg.Text("File CSV non caricato...", text_color='red', key='-statusCSV-')]
     ]
 
-    winDashboard = sg.Window('Dashboard', dashboard_layout)
+    winDashboard = sg.Window('Dashboard', dashboard_layout, resizable=True)
 
     while True:
 
@@ -146,7 +143,8 @@ def doDashboard(usr):
             file_path = sg.popup_get_file("Seleziona il file CSV", file_types=(("CSV Files", "*.csv"),))
             if file_path:
                 loadCSV(file_path)
-                winDashboard['-statusCSV-'].update('File CSV caricato', text_color='green')
+                filename = os.path.basename(file_path)
+                winDashboard['-statusCSV-'].update(f'File CSV caricato: {filename}', text_color='green')
             
         if event == "Visualizza dati CSV":
             showData()
@@ -172,6 +170,7 @@ def doDashboard(usr):
 
 # --- CERCA CSV ---
 def searchCSV(csvToCheck):
+    filename = os.path.basename(csvToCheck)
 
     operators = ['==', '!=', '>', '>=', '<', '<=']
 
@@ -187,7 +186,7 @@ def searchCSV(csvToCheck):
         [sg.Text('ProtezioneUV:')], [sg.InputText(key='-Protezioneuv-')],
         [sg.Button("Cerca")],
         [sg.Button("Back")],
-        [sg.Text(f'Search CSV: {csvToCheck}', text_color='green')]
+        [sg.Text(f'Search CSV: {filename}', text_color='green')]
     ]
 
     winSearchDashboard = sg.Window('Dashboard', search_layout)
